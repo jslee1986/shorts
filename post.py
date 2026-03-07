@@ -1,28 +1,34 @@
-from googleapiclient.discovery import build
-from google.oauth2.credentials import Credentials
-import json
+import smtplib
+from email.mime.text import MIMEText
+import random
 
-blog_id = "942916794791779939"
+blog_email = "dlwnstkd11.blogpost@blogger.com"
 
-# access token 파일 읽기
-with open("token.json") as f:
-    token_data = json.load(f)
+titles = [
+"AI 투자 전망",
+"비트코인 2026 전망",
+"건강에 좋은 영양제 추천",
+"AI 시대 돈 버는 방법"
+]
 
-creds = Credentials(
-    token=token_data["access_token"]
-)
+contents = [
+"AI 시장은 빠르게 성장하고 있습니다. 앞으로 투자 기회가 많아질 것으로 보입니다.",
+"비트코인은 여전히 많은 투자자들의 관심을 받고 있습니다.",
+"건강을 위해 많은 사람들이 영양제를 찾고 있습니다.",
+"AI 시대에는 새로운 직업과 수익 모델이 등장하고 있습니다."
+]
 
-service = build("blogger", "v3", credentials=creds)
+title = random.choice(titles)
+content = random.choice(contents)
 
-post = {
-    "title": "자동 블로그 테스트",
-    "content": "<h2>자동 업로드 성공</h2><p>GitHub 자동 포스팅 테스트</p>"
-}
+msg = MIMEText(content)
+msg["Subject"] = title
+msg["From"] = "yourgmail@gmail.com"
+msg["To"] = blog_email
 
-service.posts().insert(
-    blogId=blog_id,
-    body=post,
-    isDraft=False
-).execute()
+server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
+server.login("yourgmail@gmail.com", "앱비밀번호")
+server.sendmail("yourgmail@gmail.com", blog_email, msg.as_string())
+server.quit()
 
-print("업로드 완료")
+print("블로그 글 게시 완료")
