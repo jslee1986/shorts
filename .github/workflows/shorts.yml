@@ -1,0 +1,31 @@
+name: shorts-auto
+
+on:
+  schedule:
+    - cron: '0 22 * * *'
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+
+jobs:
+  run-shorts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: install libraries
+        run: |
+          pip install google-generativeai
+          pip install moviepy
+          pip install requests
+
+      - name: run shorts
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python shorts.py
