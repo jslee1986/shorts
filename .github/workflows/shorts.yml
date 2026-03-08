@@ -23,7 +23,8 @@ jobs:
         run: |
           pip install google-generativeai
           pip install requests
-          pip install opencv-python
+          # 수정 2: 리눅스 서버 환경 전용 OpenCV로 교체
+          pip install opencv-python-headless
           pip install numpy
           pip install pillow
           pip install google-api-python-client
