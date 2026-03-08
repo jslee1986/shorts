@@ -23,6 +23,8 @@ jobs:
         run: |
           pip install google-generativeai
           pip install moviepy
+          pip install imageio
+          pip install imageio-ffmpeg
           pip install requests
           pip install google-api-python-client
           pip install google-auth
