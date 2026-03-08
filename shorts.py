@@ -3,7 +3,9 @@ import requests
 import json
 import google.generativeai as genai
 
-from moviepy.editor import TextClip, CompositeVideoClip
+from PIL import Image, ImageDraw, ImageFont
+import cv2
+import numpy as np
 
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
@@ -64,23 +66,40 @@ def summarize(news):
 
 def create_video(lines):
 
-    clips = []
+    width = 1080
+    height = 1920
+    fps = 30
+
+    out = cv2.VideoWriter(
+        "shorts.mp4",
+        cv2.VideoWriter_fourcc(*"mp4v"),
+        fps,
+        (width, height)
+    )
+
+    font = cv2.FONT_HERSHEY_SIMPLEX
 
     for line in lines[:20]:
 
-        txt = TextClip(
-            line,
-            fontsize=70,
-            color="white",
-            size=(1080,1920),
-            method="caption"
-        ).set_duration(3)
+        frame = np.zeros((height, width, 3), dtype=np.uint8)
 
-        clips.append(txt)
+        y = height // 2
 
-    final = CompositeVideoClip(clips)
+        cv2.putText(
+            frame,
+            line[:40],
+            (80, y),
+            font,
+            1.5,
+            (255,255,255),
+            3,
+            cv2.LINE_AA
+        )
 
-    final.write_videofile("shorts.mp4", fps=30)
+        for i in range(90):
+            out.write(frame)
+
+    out.release()
 
 
 def upload_to_drive():
