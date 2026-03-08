@@ -24,7 +24,8 @@ def get_news():
 
 
 def summarize(news):
-    model = genai.GenerativeModel("models/gemini-2.0-flash") # 2.5 오타 수정 (현재 안정버전 2.0)
+    # 수정 1: 에러 난 2.0 대신 1.5-flash 모델 사용
+    model = genai.GenerativeModel("models/gemini-2.5-flash") 
     prompt = f"""
 다음 뉴스들을 쇼츠 뉴스 영상용으로 작성하세요.
 
@@ -97,13 +98,13 @@ def upload_to_drive():
     service = build("drive", "v3", credentials=creds)
 
     file_metadata = {
-        "name": f"shorts_news_{os.environ.get('GITHUB_RUN_ID', 'test')}.mp4",
+        "name": "shorts_news.mp4",
         "parents": [os.environ["GDRIVE_FOLDER_ID"]]
     }
 
     media = MediaFileUpload("shorts.mp4", mimetype="video/mp4", resumable=True)
 
-    # 수정 1: supportsAllDrives=True 추가 (권한 및 용량 할당 문제 해결)
+    # 수정 2: supportsAllDrives=True 추가 (용량 에러 방지)
     service.files().create(
         body=file_metadata,
         media_body=media,
