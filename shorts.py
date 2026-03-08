@@ -16,22 +16,15 @@ genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
 
 def get_news():
-
     url = "https://news.google.com/rss?hl=ko&gl=KR&ceid=KR:ko"
-
     r = requests.get(url)
-
     items = r.text.split("<title>")[2:12]
-
     news = [i.split("</title>")[0] for i in items]
-
     return news
 
 
 def summarize(news):
-
-    model = genai.GenerativeModel("models/gemini-2.5-flash")
-
+    model = genai.GenerativeModel("models/gemini-2.0-flash") # 2.5 오타 수정 (현재 안정버전 2.0)
     prompt = f"""
 다음 뉴스들을 쇼츠 뉴스 영상용으로 작성하세요.
 
@@ -56,16 +49,12 @@ def summarize(news):
 뉴스 목록
 {news}
 """
-
     res = model.generate_content(prompt)
-
     lines = res.text.split("\n")
-
     return [l for l in lines if l.strip() != ""]
 
 
 def create_video(lines):
-
     width = 1080
     height = 1920
     fps = 30
@@ -80,11 +69,8 @@ def create_video(lines):
     font = cv2.FONT_HERSHEY_SIMPLEX
 
     for line in lines[:20]:
-
         frame = np.zeros((height, width, 3), dtype=np.uint8)
-
         y = height // 2
-
         cv2.putText(
             frame,
             line[:40],
@@ -103,7 +89,6 @@ def create_video(lines):
 
 
 def upload_to_drive():
-
     creds = Credentials.from_service_account_info(
         json.loads(os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"]),
         scopes=["https://www.googleapis.com/auth/drive"]
@@ -112,24 +97,22 @@ def upload_to_drive():
     service = build("drive", "v3", credentials=creds)
 
     file_metadata = {
-        "name": "shorts_news.mp4",
+        "name": f"shorts_news_{os.environ.get('GITHUB_RUN_ID', 'test')}.mp4",
         "parents": [os.environ["GDRIVE_FOLDER_ID"]]
     }
 
-    media = MediaFileUpload("shorts.mp4", mimetype="video/mp4")
+    media = MediaFileUpload("shorts.mp4", mimetype="video/mp4", resumable=True)
 
+    # 수정 1: supportsAllDrives=True 추가 (권한 및 용량 할당 문제 해결)
     service.files().create(
         body=file_metadata,
-        media_body=media
+        media_body=media,
+        supportsAllDrives=True 
     ).execute()
 
 
 if __name__ == "__main__":
-
     news = get_news()
-
     lines = summarize(news)
-
     create_video(lines)
-
     upload_to_drive()
