@@ -19,18 +19,13 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: install system packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg imagemagick
-
       - name: install libraries
         run: |
           pip install google-generativeai
-          pip install moviepy==1.0.3
-          pip install imageio
-          pip install imageio-ffmpeg
           pip install requests
+          pip install opencv-python
+          pip install numpy
+          pip install pillow
           pip install google-api-python-client
           pip install google-auth
 
